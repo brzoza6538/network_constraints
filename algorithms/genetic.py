@@ -41,7 +41,7 @@ class GeneticAlgorithm:
         self._punishment_for_overuse = 1000
 
 
-    def generate_gene(self):
+    def generate_genes(self):
         for i in range(self._population_size):
             genes = {}
 
@@ -53,6 +53,7 @@ class GeneticAlgorithm:
             self._population.append(genes)
 
 
+
     def evaluate_cost(self, gene):
         full_cost = 0
         link_usage = {}
@@ -61,29 +62,53 @@ class GeneticAlgorithm:
             full_cost += self._links[link]["setup_cost"]
             link_usage[link] = 0
 
+
         for demand in self._admissible_paths.keys():
             for path in self._admissible_paths[demand].keys():
                 for link in self._admissible_paths[demand][path]:
                     link_usage[link] += gene[demand][path]
-                    # print(f"{link}    --   {path}   ----    {demand}   ------   {gene[demand][path]}")
 
 
         for link in link_usage.keys():
-
-            # print(f"-----------{link_usage[link]}") 
             for capacity, cost in self._links[link]["modules"]:
-                
                 link_usage[link] -= capacity
                 full_cost += cost
-
-                # print(f"{link_usage[link]}   |\|   {capacity}   |\|   {cost}") 
                 if(link_usage[link] <= 0):
                     break
-            
             if(link_usage[link] > 0):
                 full_cost += self._punishment_for_overuse
 
-            # print(full_cost)        
         return full_cost
 
 
+    def cross_for__aggregation(self, gene_1, gene_2):
+        '''
+        returns child - uses allels that send less thorugh less links (used links * send size)
+        '''
+
+        for demand in self._admissible_paths.keys():
+            score = 0
+            for path in self._admissible_paths[demand].keys():
+                score += gene_1[demand][path] * len(self._admissible_paths[demand][path])
+                score -= gene_2[demand][path] * len(self._admissible_paths[demand][path])
+            if(score > 0):
+                gene_1[demand] = gene_2[demand]
+        return gene_1
+
+
+    def cross_without__aggregation(self, gene_1, gene_2):
+        '''
+        returns child - gets average spread of demands by allels
+        '''
+
+        for demand in self._admissible_paths.keys():
+            remaining_demand = self._demands[demand]["demand_value"] #unikamy tracenia końcówki na na zaokrągleniu
+            for i, path in enumerate(self._admissible_paths[demand]):
+                gene_1[demand][path] = int((gene_1[demand][path] + gene_2[demand][path]) / 2)
+                remaining_demand -= gene_1[demand][path]
+                
+                # Jeśli to ostatnia ścieżka, dodajemy resztę zapotrzebowania by uniknąć tracenia na ułamkach 
+                if i == len(self._admissible_paths[demand]) - 1:
+                    gene_1[demand][path] += remaining_demand
+
+        return gene_1
