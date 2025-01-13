@@ -7,32 +7,44 @@ with open("data.txt", "r") as file:
 nodes, links, demands, admissible_paths = parse_sndlib_file(file_content)
 
 x = GeneticAlgorithm(nodes, links, demands, admissible_paths)
-x.generate_gene()
+x.generate_genes()
 
-
-
-
-last = 0
-for gene in x._population:
-    eva = (x.evaluate_cost(gene))
-    if abs(eva - last) > 1000:
-        print(f'{eva} ---- {last}') 
-        last = eva
+print(x.run_generation())
 
 
 
 
 
 
+# gene_1 = x._population[0]
 
-# for demand in x._population[0]:
-#     if demand == "Demand_5_7":
+
+# for demand in gene_1:
+#     if demand == "Demand_5_7" or demand == "Demand_3_4":
 #         print(f"DEMAND: {demand}")
-#         for path in x._population[0][demand]:
+#         for path in gene_1[demand]:
 #             print(f"\tPATH: {path}")
-#             print(f"\t\tLINKS: {x._population[0][demand][path]}")
-#             for link in admissible_paths[demand][path]:
-#                 print(f"\t\t\tLINNKS: {link}")
+#             print(f"\t\tLINKS: {gene_1[demand][path]}")
+#             #for link in admissible_paths[demand][path]:
+#                 #print(f"\t\t\tLINNKS: {link}")
+
+
+# gene_1 = x.mutate_without_aggregation(gene_1)
+
+
+# for demand in gene_1:
+#     if demand == "Demand_5_7" or demand == "Demand_3_4":
+#         print(f"DEMAND: {demand}")
+#         for path in gene_1[demand]:
+#             print(f"\tPATH: {path}")
+#             print(f"\t\tLINKS: {gene_1[demand][path]}")
+#             #for link in admissible_paths[demand][path]:
+#                 #print(f"\t\t\tLINNKS: {link}")
+
+
+
+
+
 
 
 
