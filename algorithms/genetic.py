@@ -1,7 +1,7 @@
 import random 
 import math
 import copy
-
+#trzy typy - differential, aggregation, without aggregation
 
 def rand_split_without_aggregation(number, num_of_parts):
     '''
@@ -25,7 +25,7 @@ def rand_split_for_aggregation(number, num_of_parts):
     
     parts = [0] * (num_of_parts)
     half_a = int((number/2))
-    balf_b = number/half_a
+    half_b = number/half_a
     parts[random.randint(0, num_of_parts-1)] += half_a
     parts[random.randint(0, num_of_parts-1)] += half_b
 
@@ -35,7 +35,7 @@ def rand_split_for_aggregation(number, num_of_parts):
 
 
 
-class GeneticAlgorithm:
+class EvolutionAlgorithm:
 
     def __init__(self, nodes, links, demands, admissible_paths, aggregation=False):
         self._nodes = nodes
@@ -49,7 +49,7 @@ class GeneticAlgorithm:
         self._population = []
         self._punishment_for_overuse = 1000
         self._severity_of_mutation = 0.1 # nie dawaj za dużego, bo mało pól będzie miało 0.5 całego demands w jednym pathie i może wyjść błąd
-        self._mutation_chance = 0.01
+        self._mutation_chance = 0.01 #dodanie wyciaszania?
         self._tournament_size = 5
 
     def generate_genes(self):
@@ -58,7 +58,7 @@ class GeneticAlgorithm:
 
             for demand in self._admissible_paths.keys():
                 genes[demand] = {}
-                splits = rand_split_without_aggregation( self._demands[demand]["demand_value"], len(self._admissible_paths[demand]))
+                splits = rand_split_for_aggregation( self._demands[demand]["demand_value"], len(self._admissible_paths[demand]))
                 for path in self._admissible_paths[demand].keys():
                     genes[demand][path] = splits.pop()
             self._population.append(genes)
@@ -128,7 +128,7 @@ class GeneticAlgorithm:
 
 
 
-    def mutate_without_aggregation(self, gene):
+    def mutate(self, gene):
         '''
         Returns child - gets average spread of demands by allels
         '''
@@ -148,13 +148,21 @@ class GeneticAlgorithm:
 
         return gene
 
+    def differential_mutation(self, gene_1, gene_2, gene_3):
+        child = copy.deepcopy(gene_1)
+        for demand in self._admissible_paths.keys():
+            for path in self._admissible_paths[demand].keys():
+                diff = gene_2[demand][path] - gene_3[demand][path] 
+                mutation = gene_1[demand][path] + self._severity_of_mutation * diff
+                child[demand][path] = max(0, min(mutation, self._demands[demand]["demand_value"])) 
+        return child
 
 
     def tournament_selection(self):
-        tournament = random.sample(self._population, self._tournament_size)
-        best_gene = max(tournament, key=self.evaluate_cost)
+        tournament = random.sample(self._population, self._tournament_size)  
+        best_gene = min(tournament, key=self.evaluate_cost)
         return best_gene
-    
+        
 
     def run_generation(self):
         new_population = []
@@ -165,8 +173,24 @@ class GeneticAlgorithm:
             parent_1 = self.tournament_selection()
             parent_2 = self.tournament_selection()
 
-            child_gene = self.cross_without_aggregation(parent_1, parent_2)
-            child_gene = self.mutate_without_aggregation(child_gene)
+            child_gene = self.cross_for_aggregation(parent_1, parent_2)
+            child_gene = self.mutate(child_gene)
             new_population.append(child_gene)
+        self._population = new_population
+        return self._population
+
+
+    def differential_run_generation(self):
+        new_population = []
+        while len(new_population) < self._population_size:
+            parent_1 = self.tournament_selection()
+            parent_2 = self.tournament_selection()
+            parent_3 = self.tournament_selection()
+
+            child_gene = self.differential_mutation(parent_1, parent_2, parent_3)
+            child_gene = self.mutate(child_gene) 
+
+            new_population.append(child_gene)
+
         self._population = new_population
         return self._population
