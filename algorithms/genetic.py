@@ -24,13 +24,16 @@ def rand_split_without_aggregation(number, num_of_parts):
 def rand_split_for_aggregation(number, num_of_parts):
     
     parts = [0] * (num_of_parts)
-    half_a = int((number/2))
-    half_b = number/half_a
+    half_a = int((number/6))
     parts[random.randint(0, num_of_parts-1)] += half_a
-    parts[random.randint(0, num_of_parts-1)] += half_b
+    parts[random.randint(0, num_of_parts-1)] += half_a
+    parts[random.randint(0, num_of_parts-1)] += half_a
+    parts[random.randint(0, num_of_parts-1)] += half_a
+    parts[random.randint(0, num_of_parts-1)] += half_a
+
+    parts[random.randint(0, num_of_parts-1)] += number - 6*(half_a)
 
     return parts
-
 
 
 
@@ -38,6 +41,8 @@ def rand_split_for_aggregation(number, num_of_parts):
 class EvolutionAlgorithm:
 
     def __init__(self, nodes, links, demands, admissible_paths, aggregation=False):
+        self.print_uses = 0
+
         self._nodes = nodes
         self._links = links
         self._demands = demands
@@ -47,10 +52,17 @@ class EvolutionAlgorithm:
 
         self._population_size = 1000
         self._population = []
-        self._punishment_for_overuse = 1000
+        self._punishment_for_overuse = 100000
         self._severity_of_mutation = 0.1 # nie dawaj za dużego, bo mało pól będzie miało 0.5 całego demands w jednym pathie i może wyjść błąd
-        self._mutation_chance = 0.01 #dodanie wyciaszania?
-        self._tournament_size = 5
+        self._mutation_chance = 0.1 #dodanie wyciaszania mutacji?
+        self._tournament_size = 10
+
+    def print_family(self, parent_1, parent_2, child_gene):
+        for demand in self._admissible_paths.keys():
+            print(demand)
+            for path in self._admissible_paths[demand].keys():
+                print(f"\t{self._admissible_paths[demand][path]} \t-\t {parent_1[demand][path]} {parent_2[demand][path]} {child_gene[demand][path]}")
+
 
     def generate_genes(self):
         for i in range(self._population_size):
@@ -58,11 +70,12 @@ class EvolutionAlgorithm:
 
             for demand in self._admissible_paths.keys():
                 genes[demand] = {}
-                splits = rand_split_for_aggregation( self._demands[demand]["demand_value"], len(self._admissible_paths[demand]))
+                splits = rand_split_without_aggregation( self._demands[demand]["demand_value"], len(self._admissible_paths[demand]))
                 for path in self._admissible_paths[demand].keys():
                     genes[demand][path] = splits.pop()
             self._population.append(genes)
 
+        
 
     def evaluate_cost(self, gene):
         full_cost = 0
@@ -126,9 +139,26 @@ class EvolutionAlgorithm:
         return child
 
 
+    def mutate_for_aggregation(self, gene):
+        '''
+        Returns child - gets average spread of demands by allels
+        '''
+        for demand in self._admissible_paths.keys():
+            amount_to_steal = int(self._demands[demand]["demand_value"] * self._severity_of_mutation)
+            
+            paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
 
+            if paths_to_steal_from:
+                path_to_steal_from = min(paths_to_steal_from, key=lambda path: gene[demand][path])
 
-    def mutate(self, gene):
+                paths_to_give_to = [path for path in gene[demand].keys() if path != path_to_steal_from]
+                random_path_to_give = random.choice(paths_to_give_to)
+
+                gene[demand][random_path_to_give] += gene[demand][path_to_steal_from]
+                gene[demand][path_to_steal_from] = 0
+        return gene
+
+    def mutate_without_aggregation(self, gene):
         '''
         Returns child - gets average spread of demands by allels
         '''
@@ -174,7 +204,14 @@ class EvolutionAlgorithm:
             parent_2 = self.tournament_selection()
 
             child_gene = self.cross_for_aggregation(parent_1, parent_2)
-            child_gene = self.mutate(child_gene)
+
+            #TODO remove later
+            if(self.print_uses > 0):
+                self.print_family(parent_1, parent_2, child_gene)
+                self.print_uses -= 1
+
+
+            child_gene = self.mutate_for_aggregation(child_gene)
             new_population.append(child_gene)
         self._population = new_population
         return self._population
@@ -188,7 +225,7 @@ class EvolutionAlgorithm:
             parent_3 = self.tournament_selection()
 
             child_gene = self.differential_mutation(parent_1, parent_2, parent_3)
-            child_gene = self.mutate(child_gene) 
+            child_gene = self.mutate_without_aggregation(child_gene) 
 
             new_population.append(child_gene)
 
