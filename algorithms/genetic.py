@@ -140,9 +140,7 @@ class EvolutionAlgorithm:
         '''
         Returns child - gets average spread of demands by allels
         '''
-        for demand in self._admissible_paths.keys():
-            amount_to_steal = int(self._demands[demand]["demand_value"] * self._severity_of_mutation)
-            
+        for demand in self._admissible_paths.keys():            
             paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
 
             if paths_to_steal_from:
