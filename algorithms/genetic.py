@@ -52,7 +52,7 @@ class EvolutionAlgorithm:
         self._population = []
         self._punishment_for_overuse = 100000
         self._severity_of_mutation = 0.1 # nie dawaj za dużego, bo mało pól będzie miało 0.5 całego demands w jednym pathie i może wyjść błąd
-        self._mutation_chance = 0.2 #dodanie wyciaszania mutacji?
+        self._mutation_chance = 0.4 #dodanie wyciaszania mutacji?
         self._tournament_size = 5
            
     #TODO remove later
@@ -211,8 +211,9 @@ class EvolutionAlgorithm:
                 self.print_family(parent_1, parent_2, child_gene)
                 self.print_uses -= 1
 
+            if random.random() < self._mutation_chance:
+                child_gene = self.mutate_for_aggregation(child_gene)
 
-            child_gene = self.mutate_for_aggregation(child_gene)
             new_population.append(child_gene)
         self._population = new_population
         return self._population
