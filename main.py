@@ -28,5 +28,5 @@ def run_evolution_algorithm(file_path: str, n_generations: int = 10) -> int:
 
 
 if __name__ == "__main__":
-    result = run_evolution_algorithm("data.txt", 10)
+    result = run_evolution_algorithm("data.txt", 20)
     print(f"Result: {result}")
