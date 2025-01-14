@@ -3,7 +3,12 @@ from data_reader import parse_sndlib_file
 
 
 def run_evolution_algorithm(
-    nodes, links, demands, admissible_paths, n_generations: int = 100
+    nodes,
+    links,
+    demands,
+    admissible_paths,
+    n_generations: int = 100,
+    differential: bool = False,
 ) -> int:
     """
     Runs the evolution algorithm.
@@ -16,7 +21,11 @@ def run_evolution_algorithm(
 
     result = float("inf")
     for i in range(n_generations):
-        generation = algorithm.run_generation()
+        generation = (
+            algorithm.differential_run_generation()
+            if differential
+            else algorithm.run_generation()
+        )
         generation_min = min([algorithm.evaluate_cost(gene) for gene in generation])
 
         print(f"Generation: {i}, minimum: {generation_min}")
@@ -30,5 +39,7 @@ if __name__ == "__main__":
         file_content = file.read()
     nodes, links, demands, admissible_paths = parse_sndlib_file(file_content)
 
-    result = run_evolution_algorithm("data.txt")
+    result = run_evolution_algorithm(
+        nodes, links, demands, admissible_paths, n_generations=20, differential=True
+    )
     print(f"Result: {result}")
