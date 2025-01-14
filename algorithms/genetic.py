@@ -47,13 +47,15 @@ class EvolutionAlgorithm:
         self._admissible_paths = admissible_paths
 
         self._aggregation = aggregation
-
+        self.best_to_survive = 100
         self._population_size = 1000
         self._population = []
-        self._punishment_for_overuse = 100000
-        self._severity_of_mutation = 0.1 # nie dawaj za dużego, bo mało pól będzie miało 0.5 całego demands w jednym pathie i może wyjść błąd
-        self._mutation_chance = 0.4 #dodanie wyciaszania mutacji?
-        self._tournament_size = 5
+        self._punishment_for_overuse = 1000000
+        self._severity_of_mutation = 0.5
+        self._mutation_aggregation_chance = 0.1 #dodanie wyciaszania mutacji?
+        self._normal_mutation_chance = 0.1 #dodanie wyciaszania mutacji?
+        self._switch_mutation_chance = 0.1 #dodanie wyciaszania mutacji?
+        self._tournament_size = 10
            
     #TODO remove later
     def print_family(self, parent_1, parent_2, child_gene):
@@ -158,15 +160,9 @@ class EvolutionAlgorithm:
         Returns child - gets average spread of demands by allels
         """
         for demand in self._admissible_paths.keys():
-            amount_to_steal = int(
-                self._demands[demand]["demand_value"] * self._severity_of_mutation
-            )
+            amount_to_steal = int(self._demands[demand]["demand_value"] * self._severity_of_mutation)
 
-            paths_to_steal_from = [
-                path
-                for path in gene[demand].keys()
-                if gene[demand][path] >= amount_to_steal
-            ]
+            paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
 
             if paths_to_steal_from:
                 random_path_to_steal = random.choice(paths_to_steal_from)
@@ -180,6 +176,37 @@ class EvolutionAlgorithm:
                 gene[demand][random_path_to_give] += amount_to_steal
 
         return gene
+
+
+    def mutate_with_switch(self, gene):
+        """
+        Returns child - gets average spread of demands by allels
+        """
+        for demand in self._admissible_paths.keys():
+            amount_to_steal = int(
+                self._demands[demand]["demand_value"]
+            )
+
+            paths_to_steal_from = [
+                path
+                for path in gene[demand].keys()
+                if gene[demand][path] >= amount_to_steal
+            ]
+
+            if paths_to_steal_from:
+                random_path_to_steal = random.choice(paths_to_steal_from)
+                help = gene[demand][random_path_to_steal]
+
+                paths_to_give_to = [
+                    path for path in gene[demand].keys() if path != random_path_to_steal
+                ]
+
+                random_path_to_give = random.choice(paths_to_give_to)
+                gene[demand][random_path_to_steal] = gene[demand][random_path_to_give]
+                gene[demand][random_path_to_give] += help
+
+        return gene
+
 
     def differential_mutation(self, gene_1, gene_2, gene_3):
         child = copy.deepcopy(gene_1)
@@ -199,6 +226,8 @@ class EvolutionAlgorithm:
         new_population = []
 
         sorted_population = sorted(self._population, key=self.evaluate_cost, reverse=True)
+        for survivor_gene in sorted_population[:self.best_to_survive]:
+            new_population.append(survivor_gene)
 
         while len(new_population) < self._population_size:
             parent_1 = self.tournament_selection()
@@ -211,9 +240,13 @@ class EvolutionAlgorithm:
                 self.print_family(parent_1, parent_2, child_gene)
                 self.print_uses -= 1
 
-            if random.random() < self._mutation_chance:
+            if random.random() < self._mutation_aggregation_chance:
                 child_gene = self.mutate_for_aggregation(child_gene)
-
+            if random.random() < self._switch_mutation_chance:
+                child_gene = self.mutate_with_switch(child_gene)
+            if random.random() < self._normal_mutation_chance:
+                child_gene = self.mutate_without_aggregation(child_gene)
+            
             new_population.append(child_gene)
         self._population = new_population
         return self._population
