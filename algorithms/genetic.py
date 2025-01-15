@@ -38,7 +38,19 @@ def rand_split_for_aggregation(number, num_of_parts):
 
 class EvolutionAlgorithm:
 
-    def __init__(self, nodes, links, demands, admissible_paths, aggregation=False):
+    def __init__(
+        self,
+        nodes,
+        links,
+        demands,
+        admissible_paths,
+        aggregation=False,
+        severity_of_mutation=0.5,
+        mutation_aggregation_chance=0.1,
+        normal_mutation_chance=0.2,
+        switch_mutation_chance=0.3,
+        tournament_size=2,
+    ):
         self.print_uses = 0
 
         self._nodes = nodes
@@ -47,15 +59,22 @@ class EvolutionAlgorithm:
         self._admissible_paths = admissible_paths
 
         self._aggregation = aggregation
-        self._best_to_survive = 100
-        self._population_size = 1000
+        self._best_to_survive = 50
+        self._population_size = 500
         self._population = []
         self._punishment_for_overuse = 1000000
-        self._severity_of_mutation = 0.5  # nie dawaj za dużego, bo mało pól będzie miało 0.5 całego demands w jednym pathie i może wyjść błąd
-        self._mutation_aggregation_chance = 0.1  # dodanie wyciaszania mutacji?
-        self._normal_mutation_chance = 0.2  # dodanie wyciaszania mutacji?
-        self._switch_mutation_chance = 0.3  # dodanie wyciaszania mutacji?
-        self._tournament_size = 2
+
+        self._severity_of_mutation = severity_of_mutation  # nie dawaj za dużego, bo mało pól będzie miało 0.5 całego demands w jednym pathie i może wyjść błąd
+        self._mutation_aggregation_chance = (
+            mutation_aggregation_chance  # dodanie wyciaszania mutacji?
+        )
+        self._normal_mutation_chance = (
+            normal_mutation_chance  # dodanie wyciaszania mutacji?
+        )
+        self._switch_mutation_chance = (
+            switch_mutation_chance  # dodanie wyciaszania mutacji?
+        )
+        self._tournament_size = tournament_size
 
     # TODO remove later
     def print_family(self, parent_1, parent_2, child_gene):
