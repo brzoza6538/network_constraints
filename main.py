@@ -87,9 +87,7 @@ def test_evolution_algorithm(
 if __name__ == "__main__":
     with open("data.txt", "r") as file:
         file_content = file.read()
-    nodes, links, demands, admissible_paths = parse_sndlib_file(file_content)
+    data = parse_sndlib_file(file_content)
 
-    result = run_evolution_algorithm(
-        nodes, links, demands, admissible_paths, n_generations=20, differential=True
-    )
+    result = run_evolution_algorithm(data)
     print(f"Result: {result}")

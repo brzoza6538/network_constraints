@@ -24,14 +24,9 @@ def rand_split_without_aggregation(number, num_of_parts):
 def rand_split_for_aggregation(number, num_of_parts):
 
     parts = [0] * (num_of_parts)
-    half_a = int((number / 6))
-    parts[random.randint(0, num_of_parts - 1)] += half_a
-    parts[random.randint(0, num_of_parts - 1)] += half_a
-    parts[random.randint(0, num_of_parts - 1)] += half_a
-    parts[random.randint(0, num_of_parts - 1)] += half_a
-    parts[random.randint(0, num_of_parts - 1)] += half_a
+    half_a = int(number / 2)
 
-    parts[random.randint(0, num_of_parts - 1)] += number - 6 * (half_a)
+    parts[random.randint(0, num_of_parts - 1)] += number - half_a
 
     return parts
 
@@ -192,13 +187,9 @@ class EvolutionAlgorithm:
         Returns child - gets average spread of demands by allels
         """
         for demand in self._admissible_paths.keys():
-            amount_to_steal = int(
-                self._demands[demand]["demand_value"] * self._severity_of_mutation
-            )
+            amount_to_steal = int(self._demands[demand]["demand_value"] * self._severity_of_mutation)
 
-            paths_to_steal_from = [
-                path for path in gene[demand].keys() if gene[demand][path] > 0
-            ]
+            paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
 
             if paths_to_steal_from:
                 random_path_to_steal = random.choice(paths_to_steal_from)
@@ -259,9 +250,7 @@ class EvolutionAlgorithm:
     def run_generation(self):
         new_population = []
 
-        sorted_population = sorted(
-            self._population, key=self.evaluate_cost, reverse=True
-        )
+        sorted_population = sorted(self._population, key=self.evaluate_cost, reverse=True)
         for survivor_gene in sorted_population[: self._best_to_survive]:
             new_population.append(survivor_gene)
 
