@@ -24,14 +24,9 @@ def rand_split_without_aggregation(number, num_of_parts):
 def rand_split_for_aggregation(number, num_of_parts):
 
     parts = [0] * (num_of_parts)
-    half_a = int((number / 6))
-    parts[random.randint(0, num_of_parts - 1)] += half_a
-    parts[random.randint(0, num_of_parts - 1)] += half_a
-    parts[random.randint(0, num_of_parts - 1)] += half_a
-    parts[random.randint(0, num_of_parts - 1)] += half_a
-    parts[random.randint(0, num_of_parts - 1)] += half_a
+    half_a = int(number / 2)
 
-    parts[random.randint(0, num_of_parts - 1)] += number - 6 * (half_a)
+    parts[random.randint(0, num_of_parts - 1)] += number - half_a
 
     return parts
 
@@ -237,7 +232,7 @@ class EvolutionAlgorithm:
         new_population = []
 
         sorted_population = sorted(self._population, key=self.evaluate_cost, reverse=True)
-        for survivor_gene in sorted_population[:self.best_to_survive]:
+        for survivor_gene in sorted_population[: self._best_to_survive]:
             new_population.append(survivor_gene)
 
         while len(new_population) < self._population_size:
@@ -252,13 +247,12 @@ class EvolutionAlgorithm:
                 self.print_uses -= 1
 
             if random.random() < self._mutation_aggregation_chance:
-            if random.random() < self._mutation_aggregation_chance:
                 child_gene = self.mutate_for_aggregation(child_gene)
             if random.random() < self._switch_mutation_chance:
                 child_gene = self.mutate_with_switch(child_gene)
             if random.random() < self._normal_mutation_chance:
                 child_gene = self.mutate_without_aggregation(child_gene)
-            
+
             new_population.append(child_gene)
         self._population = new_population
         return self._population
