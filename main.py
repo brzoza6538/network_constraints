@@ -30,5 +30,5 @@ if __name__ == "__main__":
         file_content = file.read()
     nodes, links, demands, admissible_paths = parse_sndlib_file(file_content)
 
-    result = run_evolution_algorithm("data.txt")
+    result = run_evolution_algorithm(nodes, links, demands, admissible_paths, n_generations=20)
     print(f"Result: {result}")
