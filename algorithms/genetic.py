@@ -118,7 +118,9 @@ class EvolutionAlgorithm:
 
         return full_cost
 
+
     def cross_for_aggregation(self, gene_1, gene_2):
+        #TODO - ot nie jest do końca aggregation - spradzasz które jest najkosztowniejsze i tyle
         """
         returns child - uses allels that send less thorugh less links (used links * send size)
         """
@@ -183,6 +185,7 @@ class EvolutionAlgorithm:
         return gene
 
     def mutate_without_aggregation(self, gene):
+        #TODO - zamienia aktualnie wszystkie na raz
         """
         Returns child - gets average spread of demands by allels
         """
