@@ -28,12 +28,12 @@ class GeneticAlgorithm:
         cross_aggregating=True,
         num_of_splits=40, # czy zaczynamy z podziałem na wiele czy z podziałem na kilka grupek z możliwością nakładania się 
 
-        population_size=1000,
+        population_size=250,
         severity_of_mutation=0.5,
 
-        mutation_aggregation_chance=0.5,
-        normal_mutation_chance=0.5,
-        switch_mutation_chance=0.5,
+        mutation_aggregation_chance=0.0,
+        normal_mutation_chance=0.0,
+        switch_mutation_chance=0.0,
 
         tournament_size=2,
         survivors=20,
@@ -234,6 +234,13 @@ class GeneticAlgorithm:
         self._normal_mutation_chance = self._normal_mutation_chance * self._normal_mutation_fadeout
         self._switch_mutation_chance = self._switch_mutation_chance * self._switch_mutation_fadeout
                                         
+    def check_if_uniqe(self, new_population, candidate):
+        for gene in new_population:
+            for demand in gene.keys():
+                for path in gene[demand].keys():     
+                    if gene[demand][path] != candidate[demand][path]:
+                        return True
+        return False
                             
     def run_generation(self):
         new_population = sorted(self._population, key=self.evaluate_cost)[:self._best_to_survive]
@@ -255,7 +262,9 @@ class GeneticAlgorithm:
             if random.random() < self._normal_mutation_chance:
                 child_gene = self.mutate_without_aggregation(child_gene)
 
-            new_population.append(child_gene)
+            if self.check_if_uniqe(new_population, child_gene):
+                new_population.append(child_gene)
+
         self._population = new_population
         self.update_probabilities()
         return self._population

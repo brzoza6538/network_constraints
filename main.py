@@ -140,8 +140,8 @@ if __name__ == "__main__":
         file_content = file.read()
     data = parse_sndlib_file(file_content)
 
-    # result = run_differential_algorithm(data)
-    # print(f"Result: {result}")
+    result = run_differential_algorithm(data)
+    print(f"Result: {result}")
 
     result = run_genetic_algorithm(data)
     print(f"Result: {result}")
