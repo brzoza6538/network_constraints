@@ -25,18 +25,18 @@ class GeneticAlgorithm:
         links,
         demands,
         admissible_paths,
-        aggregation=False,
-        num_of_splits=20, # czy zaczynamy z podziałem na wiele czy z podziałem na kilka grupek z możliwością nakładania się 
+        cross_aggregating=True,
+        num_of_splits=40, # czy zaczynamy z podziałem na wiele czy z podziałem na kilka grupek z możliwością nakładania się 
 
-        population_size=100,
+        population_size=1000,
         severity_of_mutation=0.5,
 
         mutation_aggregation_chance=0.5,
-        normal_mutation_chance=0.8,
-        switch_mutation_chance=0.9,
+        normal_mutation_chance=0.5,
+        switch_mutation_chance=0.5,
 
         tournament_size=2,
-        survivors=50,
+        survivors=20,
     ):
         self.print_uses = 0
 
@@ -45,7 +45,7 @@ class GeneticAlgorithm:
         self._demands = demands
         self._admissible_paths = admissible_paths
 
-        self._aggregation = aggregation
+        self._cross_aggregating = cross_aggregating
         self._best_to_survive = survivors
         self._population_size = population_size
         self._num_of_splits = num_of_splits 
@@ -150,8 +150,8 @@ class GeneticAlgorithm:
         """
         Returns child - gets average spread of demands by allels
         """
-        for demand in self._admissible_paths.keys():
-        # demand = random.choice(list(self._admissible_paths.keys()))
+        for demand in self._admissible_paths.keys(): # w innych przypadkach nie ma sensu, ale chyba tutaj każdy chromosom lepiej żeby przez o przeszedł
+            demand = random.choice(list(self._admissible_paths.keys()))
 
             paths_to_steal_from = [
                 path for path in gene[demand].keys() if gene[demand][path] > 0
@@ -172,7 +172,6 @@ class GeneticAlgorithm:
         return gene
 
     def mutate_without_aggregation(self, gene):
-        #TODO - zamienia aktualnie wszystkie na raz
         """
         Returns child - gets average spread of demands by allels
         """
@@ -237,17 +236,16 @@ class GeneticAlgorithm:
                                         
                             
     def run_generation(self):
-        new_population = []
-
-        sorted_population = sorted(self._population, key=self.evaluate_cost, reverse=True)
-        for survivor_gene in sorted_population[: self._best_to_survive]:
-            new_population.append(survivor_gene)
+        new_population = sorted(self._population, key=self.evaluate_cost)[:self._best_to_survive]
 
         while len(new_population) < self._population_size:
             parent_1 = self.tournament_selection()
             parent_2 = self.tournament_selection()
 
-            child_gene = self.cross_for_aggregation(parent_1, parent_2)
+            if(self._cross_aggregating == True):
+                child_gene = self.cross_for_aggregation(parent_1, parent_2)
+            else:
+                child_gene = self.cross_without_aggregation(parent_1, parent_2)
 
 
             if random.random() < self._mutation_aggregation_chance:

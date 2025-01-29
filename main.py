@@ -6,11 +6,11 @@ from algorithms.differential import DifferentialEvolutionAlgorithm
 
 def run_genetic_algorithm(
     data,
-    n_generations: int = 100,
-    aggregation: bool = False,
+    n_generations: int = 30,
+    cross_aggregating: bool = True,
     severity_of_mutation: float = 0.5,
-    mutation_aggregation_chance: float = 0.1,
-    normal_mutation_chance: float = 0.2,
+    mutation_aggregation_chance: float = 0.3,
+    normal_mutation_chance: float = 0.3,
     switch_mutation_chance: float = 0.3,
     tournament_size: int = 2,
     differential: bool = False,
@@ -27,7 +27,7 @@ def run_genetic_algorithm(
         links,
         demands,
         admissible_paths,
-        aggregation=aggregation,
+        cross_aggregating=cross_aggregating,
         severity_of_mutation=severity_of_mutation,
         mutation_aggregation_chance=mutation_aggregation_chance,
         normal_mutation_chance=normal_mutation_chance,
@@ -60,8 +60,8 @@ def run_genetic_algorithm(
 def test_genetic_algorithm(
     data,
     n_runs: int = 10,
-    n_generations: int = 100,
-    aggregation: bool = False,
+    n_generations: int = 30,
+    cross_aggregating: bool = False,
     severity_of_mutation: float = 0.5,
     mutation_aggregation_chance: float = 0.1,
     normal_mutation_chance: float = 0.2,
@@ -74,7 +74,7 @@ def test_genetic_algorithm(
         result = run_genetic_algorithm(
             data,
             n_generations=n_generations,
-            aggregation=aggregation,
+            cross_aggregating=cross_aggregating,
             severity_of_mutation=severity_of_mutation,
             mutation_aggregation_chance=mutation_aggregation_chance,
             normal_mutation_chance=normal_mutation_chance,
@@ -94,7 +94,7 @@ def test_genetic_algorithm(
 
 def run_differential_algorithm(
     data,
-    n_generations: int = 100,
+    n_generations: int = 30,
     aggregation: bool = False,
     diff_F: float = 1,
     diff_CR: float = 0.8,
@@ -140,7 +140,8 @@ if __name__ == "__main__":
         file_content = file.read()
     data = parse_sndlib_file(file_content)
 
-    result = run_differential_algorithm(data)
-    result = run_genetic_algorithm(data)
+    # result = run_differential_algorithm(data)
+    # print(f"Result: {result}")
 
+    result = run_genetic_algorithm(data)
     print(f"Result: {result}")

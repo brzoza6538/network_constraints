@@ -24,7 +24,7 @@ class DifferentialEvolutionAlgorithm:
         demands,
         admissible_paths,
         aggregation=False,
-        population_size=100,
+        population_size=1000,
         diff_F=1, 
         diff_CR=0.8,
         parental_tournament_size = 1, # for 1 = random - possibly best for some reason
