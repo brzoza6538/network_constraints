@@ -6,7 +6,7 @@ from algorithms.differential import DifferentialEvolutionAlgorithm
 
 def run_genetic_algorithm(
     data,
-    n_generations: int = 20,
+    n_generations: int = 100,
     aggregation: bool = False,
     severity_of_mutation: float = 0.5,
     mutation_aggregation_chance: float = 0.1,
@@ -38,6 +38,8 @@ def run_genetic_algorithm(
 
     result = []
     for i in range(n_generations):
+        print(f"generation {i} ")
+
         generation = (
             algorithm.differential_run_generation()
             if differential
@@ -58,7 +60,7 @@ def run_genetic_algorithm(
 def test_genetic_algorithm(
     data,
     n_runs: int = 10,
-    n_generations: int = 500,
+    n_generations: int = 100,
     aggregation: bool = False,
     severity_of_mutation: float = 0.5,
     mutation_aggregation_chance: float = 0.1,
@@ -92,10 +94,10 @@ def test_genetic_algorithm(
 
 def run_differential_algorithm(
     data,
-    n_generations: int = 500,
+    n_generations: int = 100,
     aggregation: bool = False,
     diff_F: float = 1,
-    diff_CR: float = 0.5,
+    diff_CR: float = 0.8,
 ) -> list[int]:
     """
     Runs the genetic algorithm.
@@ -110,14 +112,15 @@ def run_differential_algorithm(
         demands,
         admissible_paths,
         aggregation=aggregation,
-        #diff_F=diff_F,
-        #diff_CR = diff_CR,
+        diff_F=diff_F,
+        diff_CR = diff_CR,
     )
 
     result = []
     algorithm.generate_genes()
 
     for i in range(n_generations):
+        print(f"generation {i} ")
         generation = (algorithm.run_generation())
         costs = ([algorithm.evaluate_cost(gene) for gene in generation])
         generation_min = min(costs)
@@ -138,6 +141,6 @@ if __name__ == "__main__":
     data = parse_sndlib_file(file_content)
 
     result = run_differential_algorithm(data)
-    # result = run_genetic_algorithm(data)
+    result = run_genetic_algorithm(data)
 
     print(f"Result: {result}")

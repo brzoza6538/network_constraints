@@ -26,11 +26,17 @@ class GeneticAlgorithm:
         demands,
         admissible_paths,
         aggregation=False,
+        num_of_splits=20, # czy zaczynamy z podziałem na wiele czy z podziałem na kilka grupek z możliwością nakładania się 
+
+        population_size=100,
         severity_of_mutation=0.5,
-        mutation_aggregation_chance=0.1,
-        normal_mutation_chance=0.2,
-        switch_mutation_chance=0.3,
+
+        mutation_aggregation_chance=0.5,
+        normal_mutation_chance=0.8,
+        switch_mutation_chance=0.9,
+
         tournament_size=2,
+        survivors=50,
     ):
         self.print_uses = 0
 
@@ -40,22 +46,21 @@ class GeneticAlgorithm:
         self._admissible_paths = admissible_paths
 
         self._aggregation = aggregation
-        self._best_to_survive = 50
-        self._population_size = 500
-        self._num_of_splits = 20 # czy zaczynamy z podziałem na wiele czy z podziałem na kilka grupek
-
+        self._best_to_survive = survivors
+        self._population_size = population_size
+        self._num_of_splits = num_of_splits 
         self._population = []
         self._punishment_for_overuse = 1000000
 
         self._severity_of_mutation = severity_of_mutation
 
-        self._mutation_aggregation_chance = (mutation_aggregation_chance)
-        self._normal_mutation_chance = (normal_mutation_chance)
-        self._switch_mutation_chance = (switch_mutation_chance)
+        self._mutation_aggregation_chance = mutation_aggregation_chance
+        self._normal_mutation_chance = normal_mutation_chance
+        self._switch_mutation_chance = switch_mutation_chance
 
-        self._mutation_aggregation_fadeout = 0.9
-        self._normal_mutation_fadeout = 0.9
-        self._switch_mutation_fadeout = 0.9
+        self._mutation_aggregation_fadeout = 0.99
+        self._normal_mutation_fadeout = 0.99
+        self._switch_mutation_fadeout = 0.99
 
         self._tournament_size = tournament_size
 
@@ -109,7 +114,6 @@ class GeneticAlgorithm:
 
 
     def cross_for_aggregation(self, gene_1, gene_2):
-        #TODO - ot nie jest do końca aggregation - spradzasz które jest najkosztowniejsze i tyle
         """
         returns child - uses allels that send less thorugh less links (used links * send size)
         """
@@ -147,6 +151,8 @@ class GeneticAlgorithm:
         Returns child - gets average spread of demands by allels
         """
         for demand in self._admissible_paths.keys():
+        # demand = random.choice(list(self._admissible_paths.keys()))
+
             paths_to_steal_from = [
                 path for path in gene[demand].keys() if gene[demand][path] > 0
             ]
@@ -170,7 +176,9 @@ class GeneticAlgorithm:
         """
         Returns child - gets average spread of demands by allels
         """
-        for demand in self._admissible_paths.keys():
+        for demand in self._admissible_paths.keys(): # -  lepiej jedno czy wszystkie?
+
+        # demand = random.choice(list(self._admissible_paths.keys()))
             amount_to_steal = int(self._demands[demand]["demand_value"] * self._severity_of_mutation)
 
             paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
@@ -193,6 +201,8 @@ class GeneticAlgorithm:
         Returns child - gets average spread of demands by allels
         """
         for demand in self._admissible_paths.keys():
+        # demand = random.choice(list(self._admissible_paths.keys()))
+
             amount_to_steal = int(self._demands[demand]["demand_value"])
 
             paths_to_steal_from = [
@@ -239,10 +249,6 @@ class GeneticAlgorithm:
 
             child_gene = self.cross_for_aggregation(parent_1, parent_2)
 
-            # TODO remove later
-            if self.print_uses > 0:
-                self.print_family(parent_1, parent_2, child_gene)
-                self.print_uses -= 1
 
             if random.random() < self._mutation_aggregation_chance:
                 child_gene = self.mutate_for_aggregation(child_gene)

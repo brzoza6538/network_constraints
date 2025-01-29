@@ -24,7 +24,8 @@ class DifferentialEvolutionAlgorithm:
         demands,
         admissible_paths,
         aggregation=False,
-        diff_F=1.5, 
+        population_size=100,
+        diff_F=1, 
         diff_CR=0.8,
         parental_tournament_size = 1, # for 1 = random - possibly best for some reason
         survivors_amount = 10
@@ -35,10 +36,10 @@ class DifferentialEvolutionAlgorithm:
         self._admissible_paths = admissible_paths
 
         self._aggregation = aggregation
-        self._population_size = 1000
+        self._population_size = population_size
         self._population = []
         self._punishment_for_overuse = 1000000
-        self._demand_parts = 1
+        self._num_of_splits = 1
 
         self._diff_CR = diff_CR
         self._diff_F = diff_F  
@@ -54,7 +55,7 @@ class DifferentialEvolutionAlgorithm:
                 splits = rand_split(
                     self._demands[demand]["demand_value"],
                     len(self._admissible_paths[demand]),
-                    self._demand_parts
+                    self._num_of_splits
                 )
                 for path in self._admissible_paths[demand].keys():
                     genes[demand][path] = splits.pop()
