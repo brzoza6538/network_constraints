@@ -1,10 +1,10 @@
 import numpy as np
 
-from algorithms.genetic import EvolutionAlgorithm
+from algorithms.genetic import GeneticAlgorithm
 from data_reader import parse_sndlib_file
+from algorithms.differential import DifferentialEvolutionAlgorithm
 
-
-def run_evolution_algorithm(
+def run_genetic_algorithm(
     data,
     n_generations: int = 20,
     aggregation: bool = False,
@@ -16,13 +16,13 @@ def run_evolution_algorithm(
     differential: bool = False,
 ) -> list[int]:
     """
-    Runs the evolution algorithm.
+    Runs the genetic algorithm.
     :param file_path: Path to the file with the SNDlib data.
     :param n_generations: Number of generations to run the algorithm.
     """
 
     nodes, links, demands, admissible_paths = data
-    algorithm = EvolutionAlgorithm(
+    algorithm = GeneticAlgorithm(
         nodes,
         links,
         demands,
@@ -43,17 +43,22 @@ def run_evolution_algorithm(
             if differential
             else algorithm.run_generation()
         )
-        generation_min = min([algorithm.evaluate_cost(gene) for gene in generation])
+
+        costs = ([algorithm.evaluate_cost(gene) for gene in generation])
+        generation_min = min(costs)
+        generation_max = max(costs)
+        generation_avg = sum(costs)/len(costs)
+        print(f"{generation_min} - {generation_max} - {generation_avg}")
 
         result.append(generation_min)
 
     return result
 
 
-def test_evolution_algorithm(
+def test_genetic_algorithm(
     data,
     n_runs: int = 10,
-    n_generations: int = 20,
+    n_generations: int = 500,
     aggregation: bool = False,
     severity_of_mutation: float = 0.5,
     mutation_aggregation_chance: float = 0.1,
@@ -64,7 +69,7 @@ def test_evolution_algorithm(
 ) -> tuple:
     all_results = []
     for _ in range(n_runs):
-        result = run_evolution_algorithm(
+        result = run_genetic_algorithm(
             data,
             n_generations=n_generations,
             aggregation=aggregation,
@@ -84,10 +89,55 @@ def test_evolution_algorithm(
     return mean_results, std_results
 
 
+
+def run_differential_algorithm(
+    data,
+    n_generations: int = 500,
+    aggregation: bool = False,
+    diff_F: float = 1,
+    diff_CR: float = 0.5,
+) -> list[int]:
+    """
+    Runs the genetic algorithm.
+    :param file_path: Path to the file with the SNDlib data.
+    :param n_generations: Number of generations to run the algorithm.
+    """
+
+    nodes, links, demands, admissible_paths = data
+    algorithm = DifferentialEvolutionAlgorithm(
+        nodes,
+        links,
+        demands,
+        admissible_paths,
+        aggregation=aggregation,
+        #diff_F=diff_F,
+        #diff_CR = diff_CR,
+    )
+
+    result = []
+    algorithm.generate_genes()
+
+    for i in range(n_generations):
+        generation = (algorithm.run_generation())
+        costs = ([algorithm.evaluate_cost(gene) for gene in generation])
+        generation_min = min(costs)
+        generation_max = max(costs)
+        generation_avg = sum(costs)/len(costs)
+
+        print(f"{generation_min} - {generation_max} - {generation_avg}")
+
+        result.append(generation_min)
+
+    return result
+
+
+
 if __name__ == "__main__":
     with open("data.txt", "r") as file:
         file_content = file.read()
     data = parse_sndlib_file(file_content)
 
-    result = run_evolution_algorithm(data)
+    result = run_differential_algorithm(data)
+    # result = run_genetic_algorithm(data)
+
     print(f"Result: {result}")
