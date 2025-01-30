@@ -129,9 +129,11 @@ def plot_results(title, values, medians, stds):
 def run_differential_algorithm(
     data,
     n_generations: int = 250,
+    population_size: int = 2000,
     diff_F: float = 1,
     diff_CR: float = 0.8,
-    num_of_chunks: int = 40
+    parental_tournament_size: int = 1,
+    survivors_amount: int = 50,
 ) -> list[int]:
     """
     Runs the genetic algorithm.
@@ -145,15 +147,17 @@ def run_differential_algorithm(
         links,
         demands,
         admissible_paths,
+        population_size=population_size,
         diff_F=diff_F,
         diff_CR=diff_CR,
+        parental_tournament_size=parental_tournament_size,
+        survivors_amount=survivors_amount,
     )
 
     result = []
     algorithm.generate_genes()
 
     for i in range(n_generations):
-        print(f"generation {i} ")
         generation = algorithm.run_generation()
         costs = [algorithm.evaluate_cost(gene) for gene in generation]
         generation_min = min(costs)
@@ -161,7 +165,7 @@ def run_differential_algorithm(
 
         # TODO: Remove this
         # generation_max = max(costs)
-        # generation_avg = sum(costs)/len(costs)
+        # generation_avg = sum(costs) / len(costs)
         # print(f"Generation {i}:")
         # print(f"\tMin: {generation_min}, Max: {generation_max}, Avg: {generation_avg}")
 

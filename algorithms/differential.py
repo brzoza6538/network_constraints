@@ -23,27 +23,27 @@ class DifferentialEvolutionAlgorithm:
         links,
         demands,
         admissible_paths,
-        population_size=2000,
-        diff_F=1,
-        diff_CR=0.5,
-        parental_tournament_size = 1,
-        survivors_amount = 50
+        population_size,
+        diff_F,
+        diff_CR,
+        parental_tournament_size,
+        survivors_amount
     ):
         self._nodes = nodes
         self._links = links
         self._demands = demands
         self._admissible_paths = admissible_paths
 
-        self._population_size = population_size
         self._population = []
         self._punishment_for_overuse = 1000000
         self._num_of_chunks = 100
+        self._smoothing_mutation_chance = 0.01
 
+        self._population_size = population_size
         self._diff_CR = diff_CR
         self._diff_F = diff_F
         self._parental_tournament_size = parental_tournament_size
         self._survivors_amount = survivors_amount
-        self._smoothing_mutation_chance = 0.01
 
     def generate_genes(self):
         for i in range(self._population_size):
