@@ -150,46 +150,46 @@ class GeneticAlgorithm:
         """
         Returns child - gets average spread of demands by allels
         """
-        for demand in self._admissible_paths.keys(): # w innych przypadkach nie ma sensu, ale chyba tutaj każdy chromosom lepiej żeby przez o przeszedł
-            demand = random.choice(list(self._admissible_paths.keys()))
+        # for demand in self._admissible_paths.keys(): # w innych przypadkach nie ma sensu, ale chyba tutaj każdy chromosom lepiej żeby przez o przeszedł
+        demand = random.choice(list(self._admissible_paths.keys()))
 
-            paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
+        paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
 
-            if paths_to_steal_from:
-                path_to_steal_from = min(
-                    paths_to_steal_from, key=lambda path: gene[demand][path]
-                )
+        if paths_to_steal_from:
+            path_to_steal_from = min(
+                paths_to_steal_from, key=lambda path: gene[demand][path]
+            )
 
-                paths_to_give_to = [
-                    path for path in gene[demand].keys() if path != path_to_steal_from
-                ]
-                random_path_to_give = random.choice(paths_to_give_to)
+            paths_to_give_to = [
+                path for path in gene[demand].keys() if path != path_to_steal_from
+            ]
+            random_path_to_give = random.choice(paths_to_give_to)
 
-                gene[demand][random_path_to_give] += gene[demand][path_to_steal_from]
-                gene[demand][path_to_steal_from] = 0
+            gene[demand][random_path_to_give] += gene[demand][path_to_steal_from]
+            gene[demand][path_to_steal_from] = 0
         return gene
 
     def mutate_without_aggregation(self, gene):
         """
         Returns child - gets average spread of demands by allels
         """
-        for demand in self._admissible_paths.keys(): # -  lepiej jedno czy wszystkie?
+        # for demand in self._admissible_paths.keys(): # -  lepiej jedno czy wszystkie?
 
-        # demand = random.choice(list(self._admissible_paths.keys()))
-            amount_to_steal = int(self._demands[demand]["demand_value"] * self._severity_of_mutation)
+        demand = random.choice(list(self._admissible_paths.keys()))
+        amount_to_steal = int(self._demands[demand]["demand_value"] * self._severity_of_mutation)
 
-            paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
+        paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
 
-            if paths_to_steal_from:
-                random_path_to_steal = random.choice(paths_to_steal_from)
-                gene[demand][random_path_to_steal] -= amount_to_steal
+        if paths_to_steal_from:
+            random_path_to_steal = random.choice(paths_to_steal_from)
+            gene[demand][random_path_to_steal] -= amount_to_steal
 
-                paths_to_give_to = [
-                    path for path in gene[demand].keys() if path != random_path_to_steal
-                ]
+            paths_to_give_to = [
+                path for path in gene[demand].keys() if path != random_path_to_steal
+            ]
 
-                random_path_to_give = random.choice(paths_to_give_to)
-                gene[demand][random_path_to_give] += amount_to_steal
+            random_path_to_give = random.choice(paths_to_give_to)
+            gene[demand][random_path_to_give] += amount_to_steal
 
         return gene
 
@@ -197,28 +197,28 @@ class GeneticAlgorithm:
         """
         Returns child - gets average spread of demands by allels
         """
-        for demand in self._admissible_paths.keys():
-        # demand = random.choice(list(self._admissible_paths.keys()))
+        # for demand in self._admissible_paths.keys():
+        demand = random.choice(list(self._admissible_paths.keys()))
 
-            amount_to_steal = int(self._demands[demand]["demand_value"])
+        amount_to_steal = int(self._demands[demand]["demand_value"])
 
-            paths_to_steal_from = [
-                path
-                for path in gene[demand].keys()
-                if gene[demand][path] >= amount_to_steal
+        paths_to_steal_from = [
+            path
+            for path in gene[demand].keys()
+            if gene[demand][path] >= amount_to_steal
+        ]
+
+        if paths_to_steal_from:
+            random_path_to_steal = random.choice(paths_to_steal_from)
+            help = gene[demand][random_path_to_steal]
+
+            paths_to_give_to = [
+                path for path in gene[demand].keys() if path != random_path_to_steal
             ]
 
-            if paths_to_steal_from:
-                random_path_to_steal = random.choice(paths_to_steal_from)
-                help = gene[demand][random_path_to_steal]
-
-                paths_to_give_to = [
-                    path for path in gene[demand].keys() if path != random_path_to_steal
-                ]
-
-                random_path_to_give = random.choice(paths_to_give_to)
-                gene[demand][random_path_to_steal] = gene[demand][random_path_to_give]
-                gene[demand][random_path_to_give] += help
+            random_path_to_give = random.choice(paths_to_give_to)
+            gene[demand][random_path_to_steal] = gene[demand][random_path_to_give]
+            gene[demand][random_path_to_give] += help
 
         return gene
 
