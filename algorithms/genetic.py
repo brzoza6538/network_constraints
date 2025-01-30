@@ -1,4 +1,4 @@
-_for_aggregation import random
+import random
 import copy
 
 # typy - aggregation, without aggregation

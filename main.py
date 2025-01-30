@@ -14,7 +14,7 @@ def run_genetic_algorithm(
     switch_mutation_chance: float = 0.0,
     tournament_size: int = 2,
     differential: bool = False,
-    num_of_splits: int = 40,
+    num_of_chunks: int = 40,
 ) -> list[int]:
     """
     Runs the genetic algorithm.
@@ -28,7 +28,7 @@ def run_genetic_algorithm(
         links,
         demands,
         admissible_paths,
-        num_of_splits=num_of_splits,
+        num_of_chunks=num_of_chunks,
         cross_aggregating=cross_aggregating,
         severity_of_mutation=severity_of_mutation,
         mutation_aggregation_chance=mutation_aggregation_chance,
@@ -70,14 +70,14 @@ def test_genetic_algorithm(
     switch_mutation_chance: float = 0.3,
     tournament_size: int = 2,
     differential: bool = False,
-    num_of_splits: int = 40,
+    num_of_chunks: int = 40,
 
 ) -> tuple:
     all_results = []
     for _ in range(n_runs):
         result = run_genetic_algorithm(
             data,
-            num_of_splits=num_of_splits,
+            num_of_chunks=num_of_chunks,
             n_generations=n_generations,
             cross_aggregating=cross_aggregating,
             severity_of_mutation=severity_of_mutation,
@@ -102,7 +102,7 @@ def run_differential_algorithm(
     n_generations: int = 250,
     diff_F: float = 1,
     diff_CR: float = 0.8,
-    num_of_splits: int = 40
+    num_of_chunks: int = 40
 ) -> list[int]:
     """
     Runs the genetic algorithm.
@@ -118,7 +118,7 @@ def run_differential_algorithm(
         admissible_paths,
         diff_F=diff_F,
         diff_CR = diff_CR,
-        num_of_splits=num_of_splits,
+        num_of_chunks=num_of_chunks,
     )
 
     result = []
