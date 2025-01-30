@@ -94,8 +94,7 @@ def test_genetic_algorithm(
 
 def run_differential_algorithm(
     data,
-    n_generations: int = 30,
-    aggregation: bool = False,
+    n_generations: int = 250,
     diff_F: float = 1,
     diff_CR: float = 0.8,
 ) -> list[int]:
@@ -111,7 +110,6 @@ def run_differential_algorithm(
         links,
         demands,
         admissible_paths,
-        aggregation=aggregation,
         diff_F=diff_F,
         diff_CR = diff_CR,
     )
@@ -143,5 +141,5 @@ if __name__ == "__main__":
     result = run_differential_algorithm(data)
     print(f"Result: {result}")
 
-    result = run_genetic_algorithm(data)
-    print(f"Result: {result}")
+    # result = run_genetic_algorithm(data)
+    # print(f"Result: {result}")

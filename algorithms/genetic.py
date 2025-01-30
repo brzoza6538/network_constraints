@@ -153,9 +153,7 @@ class GeneticAlgorithm:
         for demand in self._admissible_paths.keys(): # w innych przypadkach nie ma sensu, ale chyba tutaj każdy chromosom lepiej żeby przez o przeszedł
             demand = random.choice(list(self._admissible_paths.keys()))
 
-            paths_to_steal_from = [
-                path for path in gene[demand].keys() if gene[demand][path] > 0
-            ]
+            paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
 
             if paths_to_steal_from:
                 path_to_steal_from = min(

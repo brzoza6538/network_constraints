@@ -23,29 +23,27 @@ class DifferentialEvolutionAlgorithm:
         links,
         demands,
         admissible_paths,
-        aggregation=False,
-        population_size=1000,
+        population_size=2000,
         diff_F=1, 
-        diff_CR=0.8,
+        diff_CR=0.5,
         parental_tournament_size = 1, # for 1 = random - possibly best for some reason
-        survivors_amount = 10
+        survivors_amount = 20
     ):
         self._nodes = nodes
         self._links = links
         self._demands = demands
         self._admissible_paths = admissible_paths
 
-        self._aggregation = aggregation
         self._population_size = population_size
         self._population = []
         self._punishment_for_overuse = 1000000
-        self._num_of_splits = 1
+        self._num_of_splits = 80
 
         self._diff_CR = diff_CR
         self._diff_F = diff_F  
         self._parental_tournament_size = parental_tournament_size
         self._survivors_amount = survivors_amount
-
+        self._smoothing_mutation_chance = 0.01
     def generate_genes(self):
         for i in range(self._population_size):
             genes = {}
@@ -94,6 +92,19 @@ class DifferentialEvolutionAlgorithm:
             lowest_path = min(child[demand], key=child[demand].get)
         return child
 
+
+    def smoothe_out(self, child):
+        for demand in self._admissible_paths.keys():
+            lowest_path = min(child[demand], key=child[demand].get)
+
+            paths_with_positive_values = [path for path in child[demand] if child[demand][path] > 0]
+            difuser_path = random.choice(paths_with_positive_values)
+            child[demand][difuser_path] += child[demand][lowest_path]
+            child[demand][lowest_path] = 0
+            lowest_path = min(child[demand], key=child[demand].get)
+
+        return child
+
     def mutation_with_crossover(self, gene_1, gene_2, gene_3):
         #każdy demand musi mieć stałą sume path równą oczekiwanej w demand wartości 
         # moduł czy max(0, ...) nie zadziała 
@@ -123,6 +134,9 @@ class DifferentialEvolutionAlgorithm:
             if negative_allel_flag:
                 #rozwiązanie zachowujące plus minus agregacje
                 child = self.diffuse_negative_path(child, demand)
+            
+        if random.random() < self._smoothing_mutation_chance:
+            self.smoothe_out(child)
 
         return child
 
