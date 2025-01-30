@@ -67,7 +67,7 @@ def test_genetic_algorithm(
     tournament_size: int = 2,
     survivors: int = 10,
     severity_of_mutation: float = 0.8,
-    mutation_chance: float = 0.8,
+    mutation_chance: float = 0.9,
     mutation_type: Literal["normal", "aggregation", "switch"] = "normal",
 ) -> tuple:
     """
