@@ -131,6 +131,7 @@ def run_differential_algorithm(
     n_generations: int = 250,
     diff_F: float = 1,
     diff_CR: float = 0.8,
+    num_of_chunks: int = 40
 ) -> list[int]:
     """
     Runs the genetic algorithm.
