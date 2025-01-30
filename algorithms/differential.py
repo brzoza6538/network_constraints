@@ -8,10 +8,10 @@ def rand_split(number, num_of_parts, number_of_splits):
 
     parts = [0] * (num_of_parts)
     half_a = int(number / number_of_splits)
-    
+
     for _ in range(number_of_splits):
         parts[random.randint(0, num_of_parts - 1)] += half_a
-    
+
     parts[random.randint(0, num_of_parts - 1)] += number - (number_of_splits * half_a)
     return parts
 
@@ -24,10 +24,10 @@ class DifferentialEvolutionAlgorithm:
         demands,
         admissible_paths,
         population_size=2000,
-        diff_F=1, 
+        diff_F=1,
         diff_CR=0.5,
-        parental_tournament_size = 1, # for 1 = random - possibly best for some reason
-        survivors_amount = 20
+        parental_tournament_size = 1,
+        survivors_amount = 50
     ):
         self._nodes = nodes
         self._links = links
@@ -37,13 +37,14 @@ class DifferentialEvolutionAlgorithm:
         self._population_size = population_size
         self._population = []
         self._punishment_for_overuse = 1000000
-        self._num_of_splits = 80
+        self._num_of_splits = 100
 
         self._diff_CR = diff_CR
-        self._diff_F = diff_F  
+        self._diff_F = diff_F
         self._parental_tournament_size = parental_tournament_size
         self._survivors_amount = survivors_amount
         self._smoothing_mutation_chance = 0.01
+
     def generate_genes(self):
         for i in range(self._population_size):
             genes = {}
@@ -106,9 +107,9 @@ class DifferentialEvolutionAlgorithm:
         return child
 
     def mutation_with_crossover(self, gene_1, gene_2, gene_3):
-        #każdy demand musi mieć stałą sume path równą oczekiwanej w demand wartości 
-        # moduł czy max(0, ...) nie zadziała 
-        # wektor nie może być mniejszy od zera 
+        #każdy demand musi mieć stałą sume path równą oczekiwanej w demand wartości
+        # moduł czy max(0, ...) nie zadziała
+        # wektor nie może być mniejszy od zera
         negative_allel_flag = False
         child = copy.deepcopy(gene_1)
 
@@ -134,7 +135,7 @@ class DifferentialEvolutionAlgorithm:
             if negative_allel_flag:
                 #rozwiązanie zachowujące plus minus agregacje
                 child = self.diffuse_negative_path(child, demand)
-            
+
         if random.random() < self._smoothing_mutation_chance:
             self.smoothe_out(child)
 
@@ -166,11 +167,11 @@ class DifferentialEvolutionAlgorithm:
     def check_if_uniqe(self, new_population, candidate):
         for gene in new_population:
             for demand in gene.keys():
-                for path in gene[demand].keys():     
+                for path in gene[demand].keys():
                     if gene[demand][path] != candidate[demand][path]:
                         return True
         return False
-        
+
     def run_generation(self):
         new_population = sorted(self._population, key=self.evaluate_cost)[:self._survivors_amount]
 
@@ -182,7 +183,7 @@ class DifferentialEvolutionAlgorithm:
 
             if self.check_if_uniqe(new_population, child):
                 new_population.append(child)
- 
+
 
         self._population = new_population
         return self._population
