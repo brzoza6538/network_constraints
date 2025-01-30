@@ -8,10 +8,10 @@ def rand_split(number, num_of_parts, number_of_chunks):
 
     parts = [0] * (num_of_parts)
     half_a = int(number / number_of_chunks)
-    
+
     for _ in range(number_of_chunks):
         parts[random.randint(0, num_of_parts - 1)] += half_a
-    
+
     parts[random.randint(0, num_of_parts - 1)] += number - (number_of_chunks * half_a)
     return parts
 
@@ -25,18 +25,18 @@ class GeneticAlgorithm:
         links,
         demands,
         admissible_paths,
-        cross_aggregating=True,
-        num_of_chunks=40, # czy zaczynamy z podziałem na wiele czy z podziałem na kilka grupek z możliwością nakładania się 
 
-        population_size=250,
-        severity_of_mutation=0.5,
+        cross_aggregating,
+        population_size,
+        survivors,
 
-        mutation_aggregation_chance=0.0,
-        normal_mutation_chance=0.0,
-        switch_mutation_chance=0.0,
+        severity_of_mutation,
 
-        tournament_size=2,
-        survivors=20,
+        mutation_aggregation_chance,
+        normal_mutation_chance,
+        switch_mutation_chance,
+
+        tournament_size
     ):
         self.print_uses = 0
 
@@ -45,12 +45,13 @@ class GeneticAlgorithm:
         self._demands = demands
         self._admissible_paths = admissible_paths
 
-        self._cross_aggregating = cross_aggregating
-        self._best_to_survive = survivors
-        self._population_size = population_size
-        self._num_of_chunks = num_of_chunks 
+        self._num_of_chunks = 50
         self._population = []
         self._punishment_for_overuse = 1000000
+
+        self._cross_aggregating = cross_aggregating
+        self._population_size = population_size
+        self._best_to_survive = survivors
 
         self._severity_of_mutation = severity_of_mutation
 
@@ -228,15 +229,15 @@ class GeneticAlgorithm:
         self._mutation_aggregation_chance = self._mutation_aggregation_chance * self._mutation_aggregation_fadeout
         self._normal_mutation_chance = self._normal_mutation_chance * self._normal_mutation_fadeout
         self._switch_mutation_chance = self._switch_mutation_chance * self._switch_mutation_fadeout
-                                        
+
     def check_if_uniqe(self, new_population, candidate):
         for gene in new_population:
             for demand in gene.keys():
-                for path in gene[demand].keys():     
+                for path in gene[demand].keys():
                     if gene[demand][path] != candidate[demand][path]:
                         return True
         return False
-                            
+
     def run_generation(self):
         new_population = sorted(self._population, key=self.evaluate_cost)[:self._best_to_survive]
 
