@@ -4,15 +4,15 @@ import copy
 
 #DE/rand/1/bin
 
-def rand_split(number, num_of_parts, number_of_splits):
+def rand_split(number, num_of_parts, number_of_chunks):
 
     parts = [0] * (num_of_parts)
-    half_a = int(number / number_of_splits)
+    half_a = int(number / number_of_chunks)
     
-    for _ in range(number_of_splits):
+    for _ in range(number_of_chunks):
         parts[random.randint(0, num_of_parts - 1)] += half_a
     
-    parts[random.randint(0, num_of_parts - 1)] += number - (number_of_splits * half_a)
+    parts[random.randint(0, num_of_parts - 1)] += number - (number_of_chunks * half_a)
     return parts
 
 
@@ -37,7 +37,7 @@ class DifferentialEvolutionAlgorithm:
         self._population_size = population_size
         self._population = []
         self._punishment_for_overuse = 1000000
-        self._num_of_splits = 80
+        self._num_of_chunks = 80
 
         self._diff_CR = diff_CR
         self._diff_F = diff_F  
@@ -53,7 +53,7 @@ class DifferentialEvolutionAlgorithm:
                 splits = rand_split(
                     self._demands[demand]["demand_value"],
                     len(self._admissible_paths[demand]),
-                    self._num_of_splits
+                    self._num_of_chunks
                 )
                 for path in self._admissible_paths[demand].keys():
                     genes[demand][path] = splits.pop()

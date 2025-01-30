@@ -1,18 +1,18 @@
-import random
+_for_aggregation import random
 import copy
 
 # typy - aggregation, without aggregation
 
 
-def rand_split(number, num_of_parts, number_of_splits):
+def rand_split(number, num_of_parts, number_of_chunks):
 
     parts = [0] * (num_of_parts)
-    half_a = int(number / number_of_splits)
+    half_a = int(number / number_of_chunks)
     
-    for _ in range(number_of_splits):
+    for _ in range(number_of_chunks):
         parts[random.randint(0, num_of_parts - 1)] += half_a
     
-    parts[random.randint(0, num_of_parts - 1)] += number - (number_of_splits * half_a)
+    parts[random.randint(0, num_of_parts - 1)] += number - (number_of_chunks * half_a)
     return parts
 
 
@@ -26,7 +26,7 @@ class GeneticAlgorithm:
         demands,
         admissible_paths,
         cross_aggregating=True,
-        num_of_splits=40, # czy zaczynamy z podziałem na wiele czy z podziałem na kilka grupek z możliwością nakładania się 
+        num_of_chunks=40, # czy zaczynamy z podziałem na wiele czy z podziałem na kilka grupek z możliwością nakładania się 
 
         population_size=250,
         severity_of_mutation=0.5,
@@ -48,7 +48,7 @@ class GeneticAlgorithm:
         self._cross_aggregating = cross_aggregating
         self._best_to_survive = survivors
         self._population_size = population_size
-        self._num_of_splits = num_of_splits 
+        self._num_of_chunks = num_of_chunks 
         self._population = []
         self._punishment_for_overuse = 1000000
 
@@ -82,7 +82,7 @@ class GeneticAlgorithm:
                 splits = rand_split(
                     self._demands[demand]["demand_value"],
                     len(self._admissible_paths[demand]),
-                    self._num_of_splits
+                    self._num_of_chunks
                 )
                 for path in self._admissible_paths[demand].keys():
                     genes[demand][path] = splits.pop()
@@ -150,7 +150,6 @@ class GeneticAlgorithm:
         """
         Returns child - gets average spread of demands by allels
         """
-        # for demand in self._admissible_paths.keys(): # w innych przypadkach nie ma sensu, ale chyba tutaj każdy chromosom lepiej żeby przez o przeszedł
         demand = random.choice(list(self._admissible_paths.keys()))
 
         paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
@@ -173,8 +172,6 @@ class GeneticAlgorithm:
         """
         Returns child - gets average spread of demands by allels
         """
-        # for demand in self._admissible_paths.keys(): # -  lepiej jedno czy wszystkie?
-
         demand = random.choice(list(self._admissible_paths.keys()))
         amount_to_steal = int(self._demands[demand]["demand_value"] * self._severity_of_mutation)
 
@@ -218,7 +215,7 @@ class GeneticAlgorithm:
 
             random_path_to_give = random.choice(paths_to_give_to)
             gene[demand][random_path_to_steal] = gene[demand][random_path_to_give]
-            gene[demand][random_path_to_give] += help
+            gene[demand][random_path_to_give] = help
 
         return gene
 
