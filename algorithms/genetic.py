@@ -1,37 +1,23 @@
 import random
 import copy
 
-# trzy typy - differential, aggregation, without aggregation
+# typy - aggregation, without aggregation
 
 
-def rand_split_without_aggregation(number, num_of_parts):
-    """
-    Randomly splits a number into num_of_parts segments.
-    Segments can have size zero. num_of_parts must be <= the number of possible split points.
-
-    w jaki sposób???
-    """
-    possible_splits = list(range(0, number + 1, 5))
-
-    splits = sorted(random.sample(possible_splits, num_of_parts - 1))
-    splits = [0] + splits + [number]
-
-    parts = [splits[i + 1] - splits[i] for i in range(len(splits) - 1)]
-
-    return parts
-
-
-def rand_split_for_aggregation(number, num_of_parts):
+def rand_split(number, num_of_parts, number_of_splits):
 
     parts = [0] * (num_of_parts)
-    half_a = int(number / 2)
-
-    parts[random.randint(0, num_of_parts - 1)] += number - half_a
-
+    half_a = int(number / number_of_splits)
+    
+    for _ in range(number_of_splits):
+        parts[random.randint(0, num_of_parts - 1)] += half_a
+    
+    parts[random.randint(0, num_of_parts - 1)] += number - (number_of_splits * half_a)
     return parts
 
 
-class EvolutionAlgorithm:
+
+class GeneticAlgorithm:
 
     def __init__(
         self,
@@ -39,12 +25,18 @@ class EvolutionAlgorithm:
         links,
         demands,
         admissible_paths,
-        aggregation=False,
+        cross_aggregating=True,
+        num_of_splits=40, # czy zaczynamy z podziałem na wiele czy z podziałem na kilka grupek z możliwością nakładania się 
+
+        population_size=250,
         severity_of_mutation=0.5,
-        mutation_aggregation_chance=0.1,
-        normal_mutation_chance=0.2,
-        switch_mutation_chance=0.3,
+
+        mutation_aggregation_chance=0.0,
+        normal_mutation_chance=0.0,
+        switch_mutation_chance=0.0,
+
         tournament_size=2,
+        survivors=20,
     ):
         self.print_uses = 0
 
@@ -53,22 +45,23 @@ class EvolutionAlgorithm:
         self._demands = demands
         self._admissible_paths = admissible_paths
 
-        self._aggregation = aggregation
-        self._best_to_survive = 50
-        self._population_size = 500
+        self._cross_aggregating = cross_aggregating
+        self._best_to_survive = survivors
+        self._population_size = population_size
+        self._num_of_splits = num_of_splits 
         self._population = []
         self._punishment_for_overuse = 1000000
 
-        self._severity_of_mutation = severity_of_mutation  # nie dawaj za dużego, bo mało pól będzie miało 0.5 całego demands w jednym pathie i może wyjść błąd
-        self._mutation_aggregation_chance = (
-            mutation_aggregation_chance  # dodanie wyciaszania mutacji?
-        )
-        self._normal_mutation_chance = (
-            normal_mutation_chance  # dodanie wyciaszania mutacji?
-        )
-        self._switch_mutation_chance = (
-            switch_mutation_chance  # dodanie wyciaszania mutacji?
-        )
+        self._severity_of_mutation = severity_of_mutation
+
+        self._mutation_aggregation_chance = mutation_aggregation_chance
+        self._normal_mutation_chance = normal_mutation_chance
+        self._switch_mutation_chance = switch_mutation_chance
+
+        self._mutation_aggregation_fadeout = 0.99
+        self._normal_mutation_fadeout = 0.99
+        self._switch_mutation_fadeout = 0.99
+
         self._tournament_size = tournament_size
 
     # TODO remove later
@@ -86,9 +79,10 @@ class EvolutionAlgorithm:
 
             for demand in self._admissible_paths.keys():
                 genes[demand] = {}
-                splits = rand_split_without_aggregation(
+                splits = rand_split(
                     self._demands[demand]["demand_value"],
                     len(self._admissible_paths[demand]),
+                    self._num_of_splits
                 )
                 for path in self._admissible_paths[demand].keys():
                     genes[demand][path] = splits.pop()
@@ -120,7 +114,6 @@ class EvolutionAlgorithm:
 
 
     def cross_for_aggregation(self, gene_1, gene_2):
-        #TODO - ot nie jest do końca aggregation - spradzasz które jest najkosztowniejsze i tyle
         """
         returns child - uses allels that send less thorugh less links (used links * send size)
         """
@@ -129,12 +122,8 @@ class EvolutionAlgorithm:
         for demand in self._admissible_paths.keys():
             score = 0
             for path in self._admissible_paths[demand].keys():
-                score += gene_1[demand][path] * len(
-                    self._admissible_paths[demand][path]
-                )
-                score -= gene_2[demand][path] * len(
-                    self._admissible_paths[demand][path]
-                )
+                score += gene_1[demand][path] * len(self._admissible_paths[demand][path])
+                score -= gene_2[demand][path] * len(self._admissible_paths[demand][path])
             if score > 0:
                 child[demand] = gene_2[demand]
         return child
@@ -146,13 +135,9 @@ class EvolutionAlgorithm:
         child = copy.deepcopy(gene_1)
 
         for demand in self._admissible_paths.keys():
-            remaining_demand = self._demands[demand][
-                "demand_value"
-            ]  # unikamy tracenia końcówki na na zaokrągleniu
+            remaining_demand = self._demands[demand]["demand_value"]  # unikamy tracenia końcówki na na zaokrągleniu
             for i, path in enumerate(self._admissible_paths[demand]):
-                child[demand][path] = int(
-                    (gene_1[demand][path] + gene_2[demand][path]) / 2
-                )
+                child[demand][path] = int((gene_1[demand][path] + gene_2[demand][path]) / 2)
                 remaining_demand -= child[demand][path]
 
                 # Jeśli to ostatnia ścieżka, dodajemy resztę zapotrzebowania by uniknąć tracenia na ułamkach
@@ -165,10 +150,10 @@ class EvolutionAlgorithm:
         """
         Returns child - gets average spread of demands by allels
         """
-        for demand in self._admissible_paths.keys():
-            paths_to_steal_from = [
-                path for path in gene[demand].keys() if gene[demand][path] > 0
-            ]
+        for demand in self._admissible_paths.keys(): # w innych przypadkach nie ma sensu, ale chyba tutaj każdy chromosom lepiej żeby przez o przeszedł
+            demand = random.choice(list(self._admissible_paths.keys()))
+
+            paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
 
             if paths_to_steal_from:
                 path_to_steal_from = min(
@@ -185,11 +170,12 @@ class EvolutionAlgorithm:
         return gene
 
     def mutate_without_aggregation(self, gene):
-        #TODO - zamienia aktualnie wszystkie na raz
         """
         Returns child - gets average spread of demands by allels
         """
-        for demand in self._admissible_paths.keys():
+        for demand in self._admissible_paths.keys(): # -  lepiej jedno czy wszystkie?
+
+        # demand = random.choice(list(self._admissible_paths.keys()))
             amount_to_steal = int(self._demands[demand]["demand_value"] * self._severity_of_mutation)
 
             paths_to_steal_from = [path for path in gene[demand].keys() if gene[demand][path] > 0]
@@ -212,6 +198,8 @@ class EvolutionAlgorithm:
         Returns child - gets average spread of demands by allels
         """
         for demand in self._admissible_paths.keys():
+        # demand = random.choice(list(self._admissible_paths.keys()))
+
             amount_to_steal = int(self._demands[demand]["demand_value"])
 
             paths_to_steal_from = [
@@ -234,39 +222,36 @@ class EvolutionAlgorithm:
 
         return gene
 
-    def differential_mutation(self, gene_1, gene_2, gene_3):
-        child = copy.deepcopy(gene_1)
-        for demand in self._admissible_paths.keys():
-            for path in self._admissible_paths[demand].keys():
-                diff = gene_2[demand][path] - gene_3[demand][path]
-                mutation = gene_1[demand][path] + self._severity_of_mutation * diff
-                child[demand][path] = max(
-                    0, min(mutation, self._demands[demand]["demand_value"])
-                )
-        return child
-
     def tournament_selection(self):
         tournament = random.sample(self._population, self._tournament_size)
         best_gene = min(tournament, key=self.evaluate_cost)
         return best_gene
 
+    def update_probabilities(self):
+        self._mutation_aggregation_chance = self._mutation_aggregation_chance * self._mutation_aggregation_fadeout
+        self._normal_mutation_chance = self._normal_mutation_chance * self._normal_mutation_fadeout
+        self._switch_mutation_chance = self._switch_mutation_chance * self._switch_mutation_fadeout
+                                        
+    def check_if_uniqe(self, new_population, candidate):
+        for gene in new_population:
+            for demand in gene.keys():
+                for path in gene[demand].keys():     
+                    if gene[demand][path] != candidate[demand][path]:
+                        return True
+        return False
+                            
     def run_generation(self):
-        new_population = []
-
-        sorted_population = sorted(self._population, key=self.evaluate_cost, reverse=True)
-        for survivor_gene in sorted_population[: self._best_to_survive]:
-            new_population.append(survivor_gene)
+        new_population = sorted(self._population, key=self.evaluate_cost)[:self._best_to_survive]
 
         while len(new_population) < self._population_size:
             parent_1 = self.tournament_selection()
             parent_2 = self.tournament_selection()
 
-            child_gene = self.cross_for_aggregation(parent_1, parent_2)
+            if(self._cross_aggregating == True):
+                child_gene = self.cross_for_aggregation(parent_1, parent_2)
+            else:
+                child_gene = self.cross_without_aggregation(parent_1, parent_2)
 
-            # TODO remove later
-            if self.print_uses > 0:
-                self.print_family(parent_1, parent_2, child_gene)
-                self.print_uses -= 1
 
             if random.random() < self._mutation_aggregation_chance:
                 child_gene = self.mutate_for_aggregation(child_gene)
@@ -275,21 +260,9 @@ class EvolutionAlgorithm:
             if random.random() < self._normal_mutation_chance:
                 child_gene = self.mutate_without_aggregation(child_gene)
 
-            new_population.append(child_gene)
-        self._population = new_population
-        return self._population
-
-    def differential_run_generation(self):
-        new_population = []
-        while len(new_population) < self._population_size:
-            parent_1 = self.tournament_selection()
-            parent_2 = self.tournament_selection()
-            parent_3 = self.tournament_selection()
-
-            child_gene = self.differential_mutation(parent_1, parent_2, parent_3)
-            child_gene = self.mutate_without_aggregation(child_gene)
-
-            new_population.append(child_gene)
+            if self.check_if_uniqe(new_population, child_gene):
+                new_population.append(child_gene)
 
         self._population = new_population
+        self.update_probabilities()
         return self._population
