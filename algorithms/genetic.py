@@ -32,11 +32,12 @@ class GeneticAlgorithm:
 
         severity_of_mutation,
 
+        tournament_size,
+        num_of_init_chunks,
+
         mutation_aggregation_chance,
         normal_mutation_chance,
         switch_mutation_chance,
-
-        tournament_size
     ):
         self.print_uses = 0
 
@@ -45,9 +46,9 @@ class GeneticAlgorithm:
         self._demands = demands
         self._admissible_paths = admissible_paths
 
-        self._num_of_chunks = 50
+        self._num_of_init_chunks = num_of_init_chunks
         self._population = []
-        self._punishment_for_overuse = 1000000
+        self._punishment_for_overuse = 100000
 
         self._cross_aggregating = cross_aggregating
         self._population_size = population_size
@@ -83,7 +84,7 @@ class GeneticAlgorithm:
                 splits = rand_split(
                     self._demands[demand]["demand_value"],
                     len(self._admissible_paths[demand]),
-                    self._num_of_chunks
+                    self._num_of_init_chunks
                 )
                 for path in self._admissible_paths[demand].keys():
                     genes[demand][path] = splits.pop()

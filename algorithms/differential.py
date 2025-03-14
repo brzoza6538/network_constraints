@@ -27,7 +27,9 @@ class DifferentialEvolutionAlgorithm:
         diff_F,
         diff_CR,
         parental_tournament_size,
-        survivors_amount
+        survivors_amount,
+        smoothing_mutation_chance,
+        num_of_init_chunks,
     ):
         self._nodes = nodes
         self._links = links
@@ -35,14 +37,14 @@ class DifferentialEvolutionAlgorithm:
         self._admissible_paths = admissible_paths
 
         self._population = []
-        self._punishment_for_overuse = 1000000
-        self._num_of_chunks = 100
-        self._smoothing_mutation_chance = 0.01
+        self._punishment_for_overuse = 100000
+        self._num_of_init_chunks = num_of_init_chunks
+        self._smoothing_mutation_chance = smoothing_mutation_chance
 
         self._population_size = population_size
         self._diff_CR = diff_CR
         self._diff_F = diff_F
-        self._parental_tournament_size = parental_tournament_size
+        self._parental_tournament_size = parental_tournament_size  # for 1 = random
         self._survivors_amount = survivors_amount
 
     def generate_genes(self):
@@ -54,7 +56,7 @@ class DifferentialEvolutionAlgorithm:
                 splits = rand_split(
                     self._demands[demand]["demand_value"],
                     len(self._admissible_paths[demand]),
-                    self._num_of_chunks
+                    self._num_of_init_chunks
                 )
                 for path in self._admissible_paths[demand].keys():
                     genes[demand][path] = splits.pop()
@@ -94,7 +96,7 @@ class DifferentialEvolutionAlgorithm:
         return child
 
 
-    def smoothe_out(self, child):
+    def smoothe_out_mutation(self, child):
         for demand in self._admissible_paths.keys():
             lowest_path = min(child[demand], key=child[demand].get)
 
@@ -137,7 +139,7 @@ class DifferentialEvolutionAlgorithm:
                 child = self.diffuse_negative_path(child, demand)
 
         if random.random() < self._smoothing_mutation_chance:
-            self.smoothe_out(child)
+            self.smoothe_out_mutation(child)
 
         return child
 
