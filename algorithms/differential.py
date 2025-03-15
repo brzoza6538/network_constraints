@@ -46,6 +46,7 @@ class DifferentialEvolutionAlgorithm:
         self._diff_F = diff_F
         self._parental_tournament_size = parental_tournament_size  # for 1 = random
         self._survivors_amount = survivors_amount
+        self.cost_function_counter = 0
 
     def generate_genes(self):
         for i in range(self._population_size):
@@ -63,6 +64,7 @@ class DifferentialEvolutionAlgorithm:
             self._population.append(genes)
 
     def evaluate_cost(self, gene):
+        self.cost_function_counter += 1
         full_cost = 0
         link_usage = {}
 

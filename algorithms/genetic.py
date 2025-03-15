@@ -65,15 +65,7 @@ class GeneticAlgorithm:
         self._switch_mutation_fadeout = 0.99
 
         self._tournament_size = tournament_size
-
-    # TODO remove later
-    def print_family(self, parent_1, parent_2, child_gene):
-        for demand in self._admissible_paths.keys():
-            print(demand)
-            for path in self._admissible_paths[demand].keys():
-                print(
-                    f"\t{self._admissible_paths[demand][path]} \t-\t {parent_1[demand][path]} {parent_2[demand][path]} {child_gene[demand][path]}"
-                )
+        self.cost_function_counter = 0
 
     def generate_genes(self):
         for i in range(self._population_size):
@@ -91,6 +83,7 @@ class GeneticAlgorithm:
             self._population.append(genes)
 
     def evaluate_cost(self, gene):
+        self.cost_function_counter += 1
         full_cost = 0
         link_usage = {}
 
