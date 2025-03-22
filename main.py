@@ -9,14 +9,14 @@ from data_reader import parse_sndlib_file
 
 def test_genetic_algorithm(
     data,
-    n_runs: int = 5,
+    n_runs: int = 10,
     n_generations: int = 150,
     cross_aggregating: bool = True,
-    population_size: int = 100,
+    population_size: int = 150,
     tournament_size: int = 2,
     survivors: int = 10,
     severity_of_mutation: float = 0.8,
-    mutation_chance: float = 0.9,
+    mutation_chance: float = 0.5,
     mutation_type: str = "normal",
     num_of_init_chunks: int = 50,
 ) -> tuple:
@@ -72,7 +72,7 @@ def test_genetic_algorithm(
 
 def test_differential_algorithm(
     data,
-    n_runs: int = 2,
+    n_runs: int = 5,
     n_generations: int = 100,
     population_size: int = 1000,
     diff_F: float = 1,
