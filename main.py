@@ -79,8 +79,8 @@ def test_differential_algorithm(
     diff_CR: float = 0.8,
     parental_tournament_size: int = 1,
     survivors_amount: int = 50,
-    smoothing_mutation_chance: float = 0.08,
-    num_of_init_chunks: int = 50,
+    smoothing_mutation_chance: float = 0.05,
+    num_of_init_chunks: int = 1,
 ) -> tuple:
     """
     Runs the differential evolution algorithm multiple times and computes statistics.
