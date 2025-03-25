@@ -3,6 +3,8 @@ import re
 def parse_nodes(section):
     nodes = {}
     pattern = r"(\w+)\s*\(\s*([\d\.]+)\s+([\d\.]+)\s*\)"
+    #np. Gdansk ( 18.60 54.20 )
+
     matches = re.findall(pattern, section)
     for match in matches:
         node_id = match[0]
@@ -14,6 +16,8 @@ def parse_nodes(section):
 def parse_links(section):
     links = {}
     pattern = r"(\w+)\s*\(\s*(\w+)\s+(\w+)\s*\)\s*([\d\.]+)\s*([\d\.]+)\s*([\d\.]+)\s*([\d\.]+)\s*\((.*?)\)"
+    #np. Link_0_10 ( Gdansk Warsaw ) 0.00 0.00 0.00 156.00 ( 155.00 156.00 622.00 468.00 )
+   
     matches = re.findall(pattern, section)
     for match in matches:
         link_id = match[0]
@@ -39,6 +43,8 @@ def parse_links(section):
 def parse_demands(section):
     demands = {}
     pattern = r"(\w+)\s*\(\s*(\w+)\s+(\w+)\s*\)\s*(\d+)\s*([\d\.]+)\s*(\w+)"
+    #np Demand_2_6 ( Kolobrzeg Lodz ) 1 128.00 UNLIMITED
+
     matches = re.findall(pattern, section)
     for match in matches:
         demand_id = match[0]
