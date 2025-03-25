@@ -1,8 +1,6 @@
 import random
 import copy
 
-# typy - aggregation, without aggregation
-
 
 def rand_split(number, num_of_parts, number_of_chunks):
 
@@ -189,7 +187,6 @@ class GeneticAlgorithm:
         """
         Returns child - gets average spread of demands by allels
         """
-        # for demand in self._admissible_paths.keys():
         demand = random.choice(list(self._admissible_paths.keys()))
 
         amount_to_steal = int(self._demands[demand]["demand_value"])
